@@ -1,0 +1,24 @@
+{{ $decorator := (or .Vars.DecoratorName (printf "%sExample" .Interface.Name )) }}
+{{ $target := (printf "%sTarget" .Interface.Name) }}
+
+// {{$target}} is an alias for {{.Interface.Type}} 
+type {{$target}}{{.Interface.Generics.Types}} {{.Interface.Type}}{{.Interface.Generics.Params}}
+
+// {{$decorator}} implements {{$target}}
+type {{$decorator}}{{.Interface.Generics.Types}} struct {
+  base {{$target}}{{.Interface.Generics.Params}}
+}
+
+{{range $method := .Interface.Methods}}
+  // {{$method.Name}} implements {{$.Interface.Type}}
+  func (d {{$decorator}}{{$.Interface.Generics.Params}}) {{$method.Declaration}} {
+      {{ $method.Pass "d.base." }}
+  }
+{{end}}
+
+// New{{$decorator}} instruments an implementation of the {{$target}}
+func New{{$decorator}}{{$.Interface.Generics.Types}}(base {{$target}}{{$.Interface.Generics.Params}}) {{$decorator}}{{$.Interface.Generics.Params}} {
+  return {{$decorator}}{{$.Interface.Generics.Params}}{
+      base: base,
+  }
+}
