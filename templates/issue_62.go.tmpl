@@ -1,0 +1,6 @@
+ {{ $decorator := (or .Vars.DecoratorName (printf "%sDecorator" .Interface.Name )) }}
+
+{{range $method := .Interface.Methods}}
+ func (_d {{$decorator}}) {{$method.Declaration}} {
+ }
+ {{end}}

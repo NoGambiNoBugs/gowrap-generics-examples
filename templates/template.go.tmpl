@@ -1,12 +1,16 @@
 {{ $decorator := (or .Vars.DecoratorName (printf "%sExample" .Interface.Name )) }}
-{{ $target := (printf "%sTarget" .Interface.Name) }}
+{{ $input := (printf "%sInput" .Interface.Name) }}
+{{ $output := (printf "%sOutput" .Interface.Name) }}
 
-// {{$target}} is an alias for {{.Interface.Type}} 
-type {{$target}}{{.Interface.Generics.Types}} {{.Interface.Type}}{{.Interface.Generics.Params}}
+// {{$input}} is an alias for {{.Interface.Type}} 
+type {{$input}}{{.Interface.Generics.Types}} {{.Interface.Type}}{{.Interface.Generics.Params}}
 
-// {{$decorator}} implements {{$target}}
+// {{$output}} is an alias for {{.Interface.Type}} 
+type {{$output}}{{.Interface.Generics.Types}} {{.Interface.Type}}{{.Interface.Generics.Params}}
+
+// {{$decorator}} implements {{$input}}
 type {{$decorator}}{{.Interface.Generics.Types}} struct {
-  base {{$target}}{{.Interface.Generics.Params}}
+  base {{$input}}{{.Interface.Generics.Params}}
 }
 
 {{range $method := .Interface.Methods}}
@@ -16,8 +20,17 @@ type {{$decorator}}{{.Interface.Generics.Types}} struct {
   }
 {{end}}
 
-// New{{$decorator}} instruments an implementation of the {{$target}}
-func New{{$decorator}}{{$.Interface.Generics.Types}}(base {{$target}}{{$.Interface.Generics.Params}}) {{$decorator}}{{$.Interface.Generics.Params}} {
+// Provide{{$output}} instruments an implementation of the {{$input}}
+func Provide{{$output}}{{$.Interface.Generics.Types}}(base {{$input}}{{$.Interface.Generics.Params}}) (output {{$output}}{{$.Interface.Generics.Params}}) {
+  if os.Getenv("DECORATE") == "1" {
+      return New{{$decorator}}(base)
+  }
+  output = base
+  return
+}
+
+// New{{$decorator}} instruments an implementation of the {{$input}}
+func New{{$decorator}}{{$.Interface.Generics.Types}}(base {{$input}}{{$.Interface.Generics.Params}}) {{$decorator}}{{$.Interface.Generics.Params}} {
   return {{$decorator}}{{$.Interface.Generics.Params}}{
       base: base,
   }

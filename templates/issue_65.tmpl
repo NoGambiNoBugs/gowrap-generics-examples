@@ -1,0 +1,3 @@
+{{range $method := .Interface.Methods}}
+func {{$method.Declaration}}{}
+{{end}}
